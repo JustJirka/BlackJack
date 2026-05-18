@@ -12,6 +12,7 @@ var player_hand: Hand
 var dealer_hand: Hand
 
 var current_bet: int = 0
+var is_all_in: bool = false
 var hands_played: int = 0
 
 enum GameState { BETTING, PLAYER_TURN, DEALER_TURN, GAME_OVER }
@@ -60,6 +61,36 @@ func start_round():
 		else:
 			state = GameState.PLAYER_TURN
 			turn_changed.emit(true)
+
+func use_consumable(type: String):
+	if state != GameState.PLAYER_TURN and state != GameState.BETTING:
+		return
+		
+	match type:
+		"XRAY":
+			if deck.cards.size() > 0:
+				var next_card = deck.cards[-1]
+				game_over.emit("X-Ray Vision:\nNext card is " + str(next_card.rank) + " of " + str(next_card.suit))
+		"SHREDDER":
+			if state == GameState.PLAYER_TURN and player_hand.cards.size() > 0:
+				player_hand.cards.pop_back()
+				hand_updated.emit(player_hand, dealer_hand)
+		"HEART_STICKER":
+			player_hand.score_modifier += 1
+			hand_updated.emit(player_hand, dealer_hand)
+		"REWIND":
+			if state == GameState.PLAYER_TURN:
+				RunState.chips += current_bet # Refund
+				current_bet = 0
+				player_hand.clear()
+				dealer_hand.clear()
+				hand_updated.emit(player_hand, dealer_hand)
+				state = GameState.BETTING
+				turn_changed.emit(true)
+		"POCKETWATCH":
+			RunState.current_round = 1
+			RunState.target_chips = RunState.get_current_target()
+			round_info_updated.emit(RunState.current_stage, RunState.current_round, RunState.get_current_target(), RunState.max_hands - hands_played)
 
 func hit():
 	if state == GameState.PLAYER_TURN:
@@ -113,8 +144,14 @@ func end_round(message: String):
 			RunState.chips += current_bet * 2
 	elif "Push" in message:
 		RunState.chips += current_bet
+	else:
+		if is_all_in and RunState.passives.has("ALL_OR_NOTHING") and not RunState.all_in_protection_used:
+			RunState.chips += current_bet
+			message += "\n(All or Nothing Saved You!)"
+			RunState.all_in_protection_used = true
 		
 	current_bet = 0
+	is_all_in = false
 	hands_played += 1
 	
 	var round_cleared = false
@@ -122,6 +159,7 @@ func end_round(message: String):
 	
 	if RunState.chips >= RunState.get_current_target():
 		message += "\nRound Cleared!"
+		RunState.calculate_payout(RunState.get_current_target(), hands_played)
 		RunState.advance_round()
 		round_cleared = true
 	elif hands_played >= RunState.max_hands:
@@ -143,7 +181,7 @@ func end_round(message: String):
 		if round_failed:
 			get_tree().change_scene_to_file("res://scenes/TitleScreen.tscn")
 		else:
-			get_tree().change_scene_to_file("res://scenes/BlindSelect.tscn")
+			get_tree().change_scene_to_file("res://scenes/Summary.tscn")
 		return
 	
 	# Reset to betting state

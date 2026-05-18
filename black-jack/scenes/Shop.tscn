@@ -1,0 +1,159 @@
+[gd_scene load_steps=3 format=3 uid="uid://cxnmy5sxxvshop"]
+
+[ext_resource type="Script" path="res://scripts/Shop.gd" id="1_shop"]
+[ext_resource type="Texture2D" path="res://assets/blackjack_table_clean.png" id="2_bg"]
+
+[node name="Shop" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_shop")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+modulate = Color(0.2, 0.2, 0.2, 1)
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 40.0
+offset_right = 200.0
+offset_bottom = 110.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.84, 0, 1)
+theme_override_font_sizes/font_size = 54
+text = "THE SHOP"
+horizontal_alignment = 1
+
+[node name="CashLabel" type="Label" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 240.0
+offset_bottom = 110.0
+theme_override_colors/font_color = Color(0.2, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 48
+text = "Cash: $0"
+
+[node name="MainLayout" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -550.0
+offset_top = -200.0
+offset_right = 550.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 100
+alignment = 1
+
+[node name="ItemsContainer" type="VBoxContainer" parent="MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="PassiveSection" type="VBoxContainer" parent="MainLayout/ItemsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="MainLayout/ItemsContainer/PassiveSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Passive Items"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainLayout/ItemsContainer/PassiveSection"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="Panel1" type="Panel" parent="MainLayout/ItemsContainer/PassiveSection/HBoxContainer"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+
+[node name="Panel2" type="Panel" parent="MainLayout/ItemsContainer/PassiveSection/HBoxContainer"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+
+[node name="ConsumablesSection" type="VBoxContainer" parent="MainLayout/ItemsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="MainLayout/ItemsContainer/ConsumablesSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Consumables"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainLayout/ItemsContainer/ConsumablesSection"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="Panel1" type="Panel" parent="MainLayout/ItemsContainer/ConsumablesSection/HBoxContainer"]
+custom_minimum_size = Vector2(120, 150)
+layout_mode = 2
+
+[node name="Panel2" type="Panel" parent="MainLayout/ItemsContainer/ConsumablesSection/HBoxContainer"]
+custom_minimum_size = Vector2(120, 150)
+layout_mode = 2
+
+[node name="MysteryBoxesSection" type="VBoxContainer" parent="MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="MainLayout/MysteryBoxesSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Mystery Boxes"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainLayout/MysteryBoxesSection"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="Box1" type="Panel" parent="MainLayout/MysteryBoxesSection/VBoxContainer"]
+custom_minimum_size = Vector2(180, 100)
+layout_mode = 2
+
+[node name="Box2" type="Panel" parent="MainLayout/MysteryBoxesSection/VBoxContainer"]
+custom_minimum_size = Vector2(180, 100)
+layout_mode = 2
+
+[node name="Box3" type="Panel" parent="MainLayout/MysteryBoxesSection/VBoxContainer"]
+custom_minimum_size = Vector2(180, 100)
+layout_mode = 2
+
+[node name="NextButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -125.0
+offset_top = -120.0
+offset_right = 125.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 32
+text = "Next Round"
