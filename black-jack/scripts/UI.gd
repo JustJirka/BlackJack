@@ -35,13 +35,19 @@ func _on_hand_updated(player_hand, dealer_hand):
 	for child in dealer_container.get_children():
 		child.queue_free()
 		
+	var is_initial_deal = game_manager.state == game_manager.GameState.BETTING
+	var is_player_turn = game_manager.state == game_manager.GameState.PLAYER_TURN
+	var is_dealer_turn = game_manager.state == game_manager.GameState.DEALER_TURN
+	
 	# Format player
 	player_score_label.text = "Player (" + str(player_hand.get_score()) + "):"
 	for i in range(player_hand.cards.size()):
 		var c = player_hand.cards[i]
 		var card_ui = card_scene.instantiate()
 		player_container.add_child(card_ui)
-		card_ui.setup(c, false, i == player_hand.cards.size() - 1)
+		
+		var animate_p = is_initial_deal or (is_player_turn and i == player_hand.cards.size() - 1)
+		card_ui.setup(c, false, animate_p)
 		
 		# Scatter effect
 		var rng = RandomNumberGenerator.new()
@@ -58,7 +64,9 @@ func _on_hand_updated(player_hand, dealer_hand):
 			var c = dealer_hand.cards[i]
 			var card_ui = card_scene.instantiate()
 			dealer_container.add_child(card_ui)
-			card_ui.setup(c, i > 0, i == dealer_hand.cards.size() - 1)
+			
+			var animate_d = is_initial_deal or (is_dealer_turn and i == dealer_hand.cards.size() - 1)
+			card_ui.setup(c, i > 0, animate_d)
 			
 			var rng = RandomNumberGenerator.new()
 			rng.seed = c.get_instance_id()
@@ -70,7 +78,9 @@ func _on_hand_updated(player_hand, dealer_hand):
 			var c = dealer_hand.cards[i]
 			var card_ui = card_scene.instantiate()
 			dealer_container.add_child(card_ui)
-			card_ui.setup(c, false, i == dealer_hand.cards.size() - 1)
+			
+			var animate_d = is_initial_deal or (is_dealer_turn and i == dealer_hand.cards.size() - 1)
+			card_ui.setup(c, false, animate_d)
 			
 			var rng = RandomNumberGenerator.new()
 			rng.seed = c.get_instance_id()
