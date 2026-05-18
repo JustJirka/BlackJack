@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="BlackJack"
-run/main_scene="res://scenes/Main.tscn"
+run/main_scene="res://scenes/TitleScreen.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+RunState="*res://scripts/RunState.gd"
 
 [physics]
 

@@ -9,6 +9,7 @@ extends Control
 @onready var chips_visualizer = $ChipsVisualizer
 @onready var message_label = $MessageLabel
 @onready var chips_label = $ChipsLabel
+@onready var round_info_label = $RoundInfoLabel
 @onready var bet_label = $BetLabel
 
 @onready var hit_button = $HitButton
@@ -28,6 +29,7 @@ func _ready():
 	game_manager.game_over.connect(_on_game_over)
 	game_manager.turn_changed.connect(_on_turn_changed)
 	game_manager.chips_updated.connect(_on_chips_updated)
+	game_manager.round_info_updated.connect(_on_round_info_updated)
 	
 	hit_button.pressed.connect(_on_hit_pressed)
 	stand_button.pressed.connect(_on_stand_pressed)
@@ -36,7 +38,7 @@ func _ready():
 	all_in_button.pressed.connect(_on_all_in_pressed)
 	start_button.pressed.connect(_on_start_pressed)
 	
-	chips_visualizer.update_chips(game_manager.chips, game_manager.current_bet)
+	chips_visualizer.update_chips(RunState.chips, game_manager.current_bet)
 
 func _on_hand_updated(player_hand, dealer_hand):
 	var card_scene = preload("res://scenes/CardVisual.tscn")
@@ -112,6 +114,15 @@ func _on_chips_updated(chips):
 	chips_visualizer.update_chips(chips, game_manager.current_bet)
 	update_buttons()
 
+func _on_round_info_updated(stage, round_idx, target, hands_left):
+	var stage_name = "Low Stakes"
+	if round_idx == 2:
+		stage_name = "High Stakes"
+	elif round_idx == 3:
+		stage_name = "Pit Boss"
+		
+	round_info_label.text = "Stage " + str(stage) + " - " + stage_name + "\nTarget: " + str(target) + "\nHands Left: " + str(hands_left)
+
 func _on_hit_pressed():
 	game_manager.hit()
 
@@ -123,8 +134,8 @@ func _on_chip_bet_pressed(val):
 	message_label.text = ""
 
 func _on_all_in_pressed():
-	if game_manager.chips > 0:
-		game_manager.place_bet(game_manager.chips)
+	if RunState.chips > 0:
+		game_manager.place_bet(RunState.chips)
 		message_label.text = ""
 
 func _on_start_pressed():
@@ -140,6 +151,6 @@ func update_buttons():
 	stand_button.disabled = state != game_manager.GameState.PLAYER_TURN
 	
 	for btn in chip_buttons:
-		btn.disabled = state != game_manager.GameState.BETTING or game_manager.chips < btn.chip_value
-	all_in_button.disabled = state != game_manager.GameState.BETTING or game_manager.chips <= 0
+		btn.disabled = state != game_manager.GameState.BETTING or RunState.chips < btn.chip_value
+	all_in_button.disabled = state != game_manager.GameState.BETTING or RunState.chips <= 0
 	start_button.disabled = state != game_manager.GameState.BETTING or game_manager.current_bet == 0
