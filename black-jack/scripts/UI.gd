@@ -2,8 +2,10 @@ extends Control
 
 @onready var game_manager = $"../../GameManager"
 
-@onready var dealer_label = $DealerCardsLabel
-@onready var player_label = $PlayerCardsLabel
+@onready var dealer_score_label = $DealerScoreLabel
+@onready var dealer_container = $DealerCardsContainer
+@onready var player_score_label = $PlayerScoreLabel
+@onready var player_container = $PlayerCardsContainer
 @onready var message_label = $MessageLabel
 @onready var chips_label = $ChipsLabel
 @onready var bet_label = $BetLabel
@@ -25,22 +27,55 @@ func _ready():
 	start_button.pressed.connect(_on_start_pressed)
 
 func _on_hand_updated(player_hand, dealer_hand):
-	# Format player cards
-	var p_str = "Player (" + str(player_hand.get_score()) + "): "
-	for c in player_hand.cards:
-		p_str += c._to_string() + " "
-	player_label.text = p_str
+	var card_scene = preload("res://scenes/CardVisual.tscn")
 	
-	# Format dealer cards
-	var d_str = "Dealer: "
-	if game_manager.state == game_manager.GameState.PLAYER_TURN:
-		# Hide second card
-		d_str += dealer_hand.cards[0]._to_string() + " ??"
+	# Clear containers
+	for child in player_container.get_children():
+		child.queue_free()
+	for child in dealer_container.get_children():
+		child.queue_free()
+		
+	# Format player
+	player_score_label.text = "Player (" + str(player_hand.get_score()) + "):"
+	for i in range(player_hand.cards.size()):
+		var c = player_hand.cards[i]
+		var card_ui = card_scene.instantiate()
+		player_container.add_child(card_ui)
+		card_ui.setup(c, false, i == player_hand.cards.size() - 1)
+		
+		# Scatter effect
+		var rng = RandomNumberGenerator.new()
+		rng.seed = c.get_instance_id()
+		card_ui.position = Vector2(i * 35 - 30, i * 15)
+		card_ui.rotation_degrees = rng.randf_range(-12.0, 12.0)
+		
+	# Format dealer
+	var hide_dealer = game_manager.state == game_manager.GameState.BETTING or game_manager.state == game_manager.GameState.PLAYER_TURN
+	
+	if hide_dealer and dealer_hand.cards.size() > 0:
+		dealer_score_label.text = "Dealer:"
+		for i in range(dealer_hand.cards.size()):
+			var c = dealer_hand.cards[i]
+			var card_ui = card_scene.instantiate()
+			dealer_container.add_child(card_ui)
+			card_ui.setup(c, i > 0, i == dealer_hand.cards.size() - 1)
+			
+			var rng = RandomNumberGenerator.new()
+			rng.seed = c.get_instance_id()
+			card_ui.position = Vector2(i * 35 - 30, i * 15)
+			card_ui.rotation_degrees = rng.randf_range(-12.0, 12.0)
 	else:
-		d_str = "Dealer (" + str(dealer_hand.get_score()) + "): "
-		for c in dealer_hand.cards:
-			d_str += c._to_string() + " "
-	dealer_label.text = d_str
+		dealer_score_label.text = "Dealer (" + str(dealer_hand.get_score()) + "):"
+		for i in range(dealer_hand.cards.size()):
+			var c = dealer_hand.cards[i]
+			var card_ui = card_scene.instantiate()
+			dealer_container.add_child(card_ui)
+			card_ui.setup(c, false, i == dealer_hand.cards.size() - 1)
+			
+			var rng = RandomNumberGenerator.new()
+			rng.seed = c.get_instance_id()
+			card_ui.position = Vector2(i * 35 - 30, i * 15)
+			card_ui.rotation_degrees = rng.randf_range(-12.0, 12.0)
 
 func _on_game_over(message):
 	message_label.text = message
@@ -66,8 +101,8 @@ func _on_bet_pressed():
 
 func _on_start_pressed():
 	message_label.text = ""
-	player_label.text = "Player: "
-	dealer_label.text = "Dealer: "
+	player_score_label.text = "Player:"
+	dealer_score_label.text = "Dealer:"
 	game_manager.start_round()
 	update_buttons()
 
