@@ -6,13 +6,21 @@ extends Control
 @onready var dealer_container = $DealerCardsContainer
 @onready var player_score_label = $PlayerScoreLabel
 @onready var player_container = $PlayerCardsContainer
+@onready var chips_visualizer = $ChipsVisualizer
 @onready var message_label = $MessageLabel
 @onready var chips_label = $ChipsLabel
 @onready var bet_label = $BetLabel
 
 @onready var hit_button = $HitButton
 @onready var stand_button = $StandButton
-@onready var bet_button = $Bet10Button
+@onready var chip_buttons = [
+	$BettingChipsContainer/Chip1,
+	$BettingChipsContainer/Chip5,
+	$BettingChipsContainer/Chip25,
+	$BettingChipsContainer/Chip100,
+	$BettingChipsContainer/Chip500
+]
+@onready var all_in_button = $AllInButton
 @onready var start_button = $StartRoundButton
 
 func _ready():
@@ -23,8 +31,12 @@ func _ready():
 	
 	hit_button.pressed.connect(_on_hit_pressed)
 	stand_button.pressed.connect(_on_stand_pressed)
-	bet_button.pressed.connect(_on_bet_pressed)
+	for btn in chip_buttons:
+		btn.pressed.connect(func(): _on_chip_bet_pressed(btn.chip_value))
+	all_in_button.pressed.connect(_on_all_in_pressed)
 	start_button.pressed.connect(_on_start_pressed)
+	
+	chips_visualizer.update_chips(game_manager.chips, game_manager.current_bet)
 
 func _on_hand_updated(player_hand, dealer_hand):
 	var card_scene = preload("res://scenes/CardVisual.tscn")
@@ -97,6 +109,7 @@ func _on_turn_changed(is_player_turn):
 func _on_chips_updated(chips):
 	chips_label.text = "Chips: " + str(chips)
 	bet_label.text = "Bet: " + str(game_manager.current_bet)
+	chips_visualizer.update_chips(chips, game_manager.current_bet)
 	update_buttons()
 
 func _on_hit_pressed():
@@ -105,9 +118,14 @@ func _on_hit_pressed():
 func _on_stand_pressed():
 	game_manager.stand()
 
-func _on_bet_pressed():
-	game_manager.place_bet(10)
+func _on_chip_bet_pressed(val):
+	game_manager.place_bet(val)
 	message_label.text = ""
+
+func _on_all_in_pressed():
+	if game_manager.chips > 0:
+		game_manager.place_bet(game_manager.chips)
+		message_label.text = ""
 
 func _on_start_pressed():
 	message_label.text = ""
@@ -121,5 +139,7 @@ func update_buttons():
 	hit_button.disabled = state != game_manager.GameState.PLAYER_TURN
 	stand_button.disabled = state != game_manager.GameState.PLAYER_TURN
 	
-	bet_button.disabled = state != game_manager.GameState.BETTING or game_manager.chips < 10
+	for btn in chip_buttons:
+		btn.disabled = state != game_manager.GameState.BETTING or game_manager.chips < btn.chip_value
+	all_in_button.disabled = state != game_manager.GameState.BETTING or game_manager.chips <= 0
 	start_button.disabled = state != game_manager.GameState.BETTING or game_manager.current_bet == 0
