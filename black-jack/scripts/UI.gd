@@ -90,21 +90,34 @@ func _on_hand_updated(player_hand, dealer_hand):
 	var is_player_turn = game_manager.state == game_manager.GameState.PLAYER_TURN
 	var is_dealer_turn = game_manager.state == game_manager.GameState.DEALER_TURN
 	
+	var is_boss_blind = (RunState.current_round == 3 and RunState.current_boss_modifier == "BOSS_BLIND")
+	var player_has_hidden = false
+	
 	# Format player
-	player_score_label.text = "Player (" + str(player_hand.get_score()) + "):"
 	for i in range(player_hand.cards.size()):
 		var c = player_hand.cards[i]
 		var card_ui = card_scene.instantiate()
 		player_container.add_child(card_ui)
 		
-		var animate_p = is_initial_deal or (is_player_turn and i == player_hand.cards.size() - 1)
-		card_ui.setup(c, false, animate_p)
-		
-		# Scatter effect
 		var rng = RandomNumberGenerator.new()
 		rng.seed = c.get_instance_id()
+		
+		var is_blind = is_boss_blind and (rng.randf() < 0.35)
+		if is_blind:
+			player_has_hidden = true
+			
+		var animate_p = is_initial_deal or (is_player_turn and i == player_hand.cards.size() - 1)
+		card_ui.setup(c, is_blind, animate_p)
+		
+		# Scatter effect
+		rng.seed = c.get_instance_id() + 1
 		card_ui.position = Vector2(i * 35 - 30, i * 15)
 		card_ui.rotation_degrees = rng.randf_range(-12.0, 12.0)
+		
+	if player_has_hidden:
+		player_score_label.text = "Player (?):"
+	else:
+		player_score_label.text = "Player (" + str(player_hand.get_score()) + "):"
 		
 	# Format dealer
 	var hide_dealer = game_manager.state == game_manager.GameState.BETTING or game_manager.state == game_manager.GameState.PLAYER_TURN
@@ -116,27 +129,40 @@ func _on_hand_updated(player_hand, dealer_hand):
 			var card_ui = card_scene.instantiate()
 			dealer_container.add_child(card_ui)
 			
-			var animate_d = is_initial_deal or (is_dealer_turn and i == dealer_hand.cards.size() - 1)
-			card_ui.setup(c, i > 0, animate_d)
-			
 			var rng = RandomNumberGenerator.new()
 			rng.seed = c.get_instance_id()
+			var is_blind = i > 0 or (is_boss_blind and rng.randf() < 0.35)
+			
+			var animate_d = is_initial_deal or (is_dealer_turn and i == dealer_hand.cards.size() - 1)
+			card_ui.setup(c, is_blind, animate_d)
+			
+			rng.seed = c.get_instance_id() + 1
 			card_ui.position = Vector2(i * 35 - 30, i * 15)
 			card_ui.rotation_degrees = rng.randf_range(-12.0, 12.0)
 	else:
-		dealer_score_label.text = "Dealer (" + str(dealer_hand.get_score()) + "):"
+		var dealer_has_hidden = false
 		for i in range(dealer_hand.cards.size()):
 			var c = dealer_hand.cards[i]
 			var card_ui = card_scene.instantiate()
 			dealer_container.add_child(card_ui)
 			
-			var animate_d = is_initial_deal or (is_dealer_turn and i == dealer_hand.cards.size() - 1)
-			card_ui.setup(c, false, animate_d)
-			
 			var rng = RandomNumberGenerator.new()
 			rng.seed = c.get_instance_id()
+			var is_blind = is_boss_blind and (rng.randf() < 0.35)
+			if is_blind:
+				dealer_has_hidden = true
+				
+			var animate_d = is_initial_deal or (is_dealer_turn and i == dealer_hand.cards.size() - 1)
+			card_ui.setup(c, is_blind, animate_d)
+			
+			rng.seed = c.get_instance_id() + 1
 			card_ui.position = Vector2(i * 35 - 30, i * 15)
 			card_ui.rotation_degrees = rng.randf_range(-12.0, 12.0)
+			
+		if dealer_has_hidden:
+			dealer_score_label.text = "Dealer (?):"
+		else:
+			dealer_score_label.text = "Dealer (" + str(dealer_hand.get_score()) + "):"
 
 func _on_game_over(message):
 	message_label.text = message

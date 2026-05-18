@@ -17,6 +17,19 @@ var passives: Array = []
 var max_passives: int = 5
 var all_in_protection_used: bool = false
 
+var current_boss_modifier: String = ""
+var boss_modifiers = [
+	{"id": "BOSS_RED", "name": "The Crimson", "desc": "All red cards are worth double."},
+	{"id": "BOSS_BLIND", "name": "The Blind", "desc": "Values of some cards are hidden."},
+	{"id": "BOSS_TAX", "name": "The Tax", "desc": "Lose 50 chips per hand played."}
+]
+
+func get_boss_data() -> Dictionary:
+	for b in boss_modifiers:
+		if b["id"] == current_boss_modifier:
+			return b
+	return boss_modifiers[0]
+
 func get_target(stage, round_idx) -> int:
 	var stage_multiplier = 1.0 + (stage - 1) * 0.5
 	if round_idx == 1:
@@ -34,6 +47,7 @@ func advance_round():
 	if current_round > 3:
 		current_round = 1
 		current_stage += 1
+		_pick_new_boss()
 		
 	all_in_protection_used = false
 
@@ -45,6 +59,10 @@ func reset_run():
 	passives.clear()
 	consumables.clear()
 	all_in_protection_used = false
+	_pick_new_boss()
+
+func _pick_new_boss():
+	current_boss_modifier = boss_modifiers[randi() % boss_modifiers.size()]["id"]
 
 func calculate_payout(target: int, hands_played: int):
 	last_payout_base = 5

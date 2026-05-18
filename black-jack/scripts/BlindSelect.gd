@@ -11,9 +11,15 @@ func _ready():
 	var big_target = RunState.get_target(RunState.current_stage, 2)
 	var boss_target = RunState.get_target(RunState.current_stage, 3)
 	
+	var boss_data = RunState.get_boss_data()
+	
 	$BlindsContainer/SmallBlind/TargetLabel.text = "Target:\n" + str(small_target)
 	$BlindsContainer/BigBlind/TargetLabel.text = "Target:\n" + str(big_target)
 	$BlindsContainer/BossBlind/TargetLabel.text = "Target:\n" + str(boss_target)
+	
+	if RunState.current_round <= 3:
+		$BlindsContainer/BossBlind/TitleLabel.text = "Pit Boss:\n" + boss_data["name"]
+		$BlindsContainer/BossBlind/TitleLabel.add_theme_font_size_override("font_size", 20)
 	
 	small_btn.disabled = RunState.current_round != 1
 	big_btn.disabled = RunState.current_round != 2

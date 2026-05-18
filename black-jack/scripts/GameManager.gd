@@ -149,6 +149,10 @@ func end_round(message: String):
 			RunState.chips += current_bet
 			message += "\n(All or Nothing Saved You!)"
 			RunState.all_in_protection_used = true
+			
+	if RunState.current_round == 3 and RunState.current_boss_modifier == "BOSS_TAX":
+		RunState.chips -= 50
+		message += "\n(Boss Tax: -50 Chips)"
 		
 	current_bet = 0
 	is_all_in = false
