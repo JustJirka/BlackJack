@@ -1,12 +1,16 @@
-[gd_scene load_steps=5 format=3 uid="uid://cxnmy5sxxvll"]
+[gd_scene load_steps=6 format=3 uid="uid://cxnmy5sxxvll"]
 
 [ext_resource type="Script" path="res://scripts/GameManager.gd" id="1_manager"]
 [ext_resource type="Script" path="res://scripts/UI.gd" id="2_ui"]
 [ext_resource type="Texture2D" path="res://assets/blackjack_table_clean.png" id="3_bg"]
 [ext_resource type="Script" path="res://scripts/ChipsVisualizer.gd" id="4_chips"]
 [ext_resource type="Script" path="res://scripts/ChipButton.gd" id="5_chip_btn"]
+[ext_resource type="Script" path="res://scripts/AudioManager.gd" id="6_audio"]
 
 [node name="Main" type="Node2D"]
+
+[node name="AudioManager" type="Node" parent="."]
+script = ExtResource("6_audio")
 
 [node name="GameManager" type="Node" parent="."]
 script = ExtResource("1_manager")

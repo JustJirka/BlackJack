@@ -10,6 +10,7 @@ signal round_info_updated(stage, round_idx, target, hands_left)
 var deck: Deck
 var player_hand: Hand
 var dealer_hand: Hand
+var audio_manager: Node
 
 var current_bet: int = 0
 var is_all_in: bool = false
@@ -27,6 +28,11 @@ func _ready():
 	add_child(player_hand)
 	add_child(dealer_hand)
 	
+	# Get audio manager reference
+	audio_manager = get_node("/root/Main/AudioManager")
+	if audio_manager:
+		audio_manager.play_background_music()
+	
 	# Initial UI update
 	call_deferred("emit_initial_state")
 
@@ -40,6 +46,8 @@ func place_bet(amount: int):
 		RunState.chips -= amount
 		current_bet += amount
 		chips_updated.emit(RunState.chips)
+		if audio_manager:
+			audio_manager.play_chip_clink()
 
 func start_round():
 	if state == GameState.BETTING and current_bet > 0:
@@ -50,13 +58,26 @@ func start_round():
 		
 		# Deal initial cards
 		player_hand.add_card(deck.draw())
+		if audio_manager:
+			audio_manager.play_card_deal()
+		
 		dealer_hand.add_card(deck.draw())
+		if audio_manager:
+			audio_manager.play_card_deal()
+		
 		player_hand.add_card(deck.draw())
+		if audio_manager:
+			audio_manager.play_card_deal()
+		
 		dealer_hand.add_card(deck.draw()) # Second dealer card usually hidden
+		if audio_manager:
+			audio_manager.play_card_deal()
 		
 		hand_updated.emit(player_hand, dealer_hand)
 		
 		if player_hand.is_blackjack():
+			if audio_manager:
+				audio_manager.play_blackjack_sound()
 			end_round("Player Blackjack!")
 		else:
 			state = GameState.PLAYER_TURN
@@ -95,9 +116,14 @@ func use_consumable(type: String):
 func hit():
 	if state == GameState.PLAYER_TURN:
 		player_hand.add_card(deck.draw())
+		if audio_manager:
+			audio_manager.play_card_deal()
+		
 		hand_updated.emit(player_hand, dealer_hand)
 		
 		if player_hand.is_busted():
+			if audio_manager:
+				audio_manager.play_bust_sound()
 			end_round("Player Busted! Dealer Wins.")
 
 func stand():
@@ -113,6 +139,9 @@ func play_dealer_turn():
 	while dealer_hand.get_score() < 17:
 		await get_tree().create_timer(1.0).timeout
 		dealer_hand.add_card(deck.draw())
+		if audio_manager:
+			audio_manager.play_card_deal()
+		
 		hand_updated.emit(player_hand, dealer_hand)
 		
 		if dealer_hand.is_busted():
@@ -138,6 +167,8 @@ func end_round(message: String):
 	state = GameState.GAME_OVER
 	
 	if "Player Wins" in message or "Blackjack" in message:
+		if audio_manager:
+			audio_manager.play_win_sound()
 		if "Blackjack" in message:
 			RunState.chips += int(current_bet * 2.5) # 3:2 payout
 		else:
@@ -145,6 +176,8 @@ func end_round(message: String):
 	elif "Push" in message:
 		RunState.chips += current_bet
 	else:
+		if audio_manager:
+			audio_manager.play_loss_sound()
 		if is_all_in and RunState.passives.has("ALL_OR_NOTHING") and not RunState.all_in_protection_used:
 			RunState.chips += current_bet
 			message += "\n(All or Nothing Saved You!)"
