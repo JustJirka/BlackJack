@@ -23,7 +23,6 @@ extends Control
 ]
 @onready var all_in_button = $AllInButton
 @onready var start_button = $StartRoundButton
-@onready var debug_win_button = $DebugWinButton
 @onready var consumables_container = $ConsumablesContainer
 
 func _ready():
@@ -39,7 +38,6 @@ func _ready():
 		btn.pressed.connect(func(): _on_chip_bet_pressed(btn.chip_value))
 	all_in_button.pressed.connect(_on_all_in_pressed)
 	start_button.pressed.connect(_on_start_pressed)
-	debug_win_button.pressed.connect(_on_debug_win_pressed)
 	
 	chips_visualizer.update_chips(RunState.chips, game_manager.current_bet)
 	_update_consumables_ui()
@@ -208,10 +206,6 @@ func _on_start_pressed():
 	dealer_score_label.text = "Dealer:"
 	game_manager.start_round()
 	update_buttons()
-
-func _on_debug_win_pressed():
-	RunState.chips = RunState.get_current_target() + 100
-	game_manager.end_round("DEBUG WIN!")
 
 func update_buttons():
 	var state = game_manager.state

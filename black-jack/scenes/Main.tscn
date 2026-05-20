@@ -247,19 +247,6 @@ Target: 150
 Hands Left: 5"
 horizontal_alignment = 2
 
-[node name="DebugWinButton" type="Button" parent="CanvasLayer/UI"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -200.0
-offset_top = 130.0
-offset_right = -20.0
-offset_bottom = 170.0
-grow_horizontal = 0
-theme_override_font_sizes/font_size = 18
-text = "DEBUG: Win Round"
-
 [node name="ChipsLabel" type="Label" parent="CanvasLayer/UI"]
 layout_mode = 1
 anchors_preset = 2
